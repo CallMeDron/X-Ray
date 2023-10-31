@@ -1,15 +1,18 @@
 import trimesh
 import numpy as np
 from math import floor
+from matplotlib.pyplot import imsave
 
 # Для понимания задачи, геометрии, осей и параметров рекомендуется ознакомиться с файлами scheme.jpg
 
 # Общие параметры программы
 MODEL_PATH: str = 'D:/X-Ray/models/cylinders.stl'  # Путь к файлу с .stl моделью
+RESULT_PATH: str = 'D:/X-Ray/results/cylinders.png'  # Путь к файлу с результирующим изображением
 SAVE_SLICES: bool = False  # Сохранять изображения слайсов?
 SLICES_PATH: str = 'D:/X-Ray/slices/'  # Путь к папке хранения слайсов
 X_RAY_DETECTION_STEP: float = 0.5  # Шаг сетки (в пикселях) для расчёта интенсивности излучения
 SHOW_PROGRESS: bool = True  # Выводить информацию о прогрессе вычислений в консоль?
+SHOW_CONTEXT: bool = True  # Выводить workflow информацию?
 
 # Параметры конструкции. Все значения в мм
 l: int = 1000  # Длина горизонтальной области с датчиками
@@ -55,7 +58,8 @@ def get_stl_size(model_path: str) -> list[float]:
     """
     mesh: trimesh.Trimesh = trimesh.load_mesh(model_path)
     vert_coords: list[list[float]] = [sorted([v[i] for v in mesh.vertices]) for i in range(3)]
-    print([round(vert_coords[i][-1] - vert_coords[i][0], 2) for i in range(3)])
+    print('Базовые размеры модели, мм:')
+    print([round(vert_coords[i][-1] - vert_coords[i][0], 2) for i in range(3)], end='\n\n')
     return [vert_coords[i][-1] - vert_coords[i][0] for i in range(3)]
 
 
@@ -249,27 +253,31 @@ def x_ray(pixel_size: list[list[int]], space: np.ndarray[bool]) -> np.ndarray[fl
             tmp = (pixel_size[0][1] - pixel_size[0][0]) / 100
             print(f'{round((j - pixel_size[0][0]) / tmp, 1)}%')
 
-    return np.rot90(display)
+    return display.T
 
 
-def workflow() -> np.ndarray[float]:
+def workflow() -> None:
     # Скалируем, поворачиваем и нарезаем модель
     model_size, sliced_model = slicer()
-    print('Реальные размеры модели, мм XYZ:', model_size)
-    print('Пиксельные размеры модели XYZ:', [sliced_model.shape[i] for i in [1, 0, 2]], end='\n\n')
+    if SHOW_CONTEXT:
+        print('Реальные размеры модели, мм XYZ:', model_size)
+        print('Пиксельные размеры модели XYZ:', [sliced_model.shape[i] for i in [1, 0, 2]], end='\n\n')
 
     # Создаём пустое пространство, куда потом поместим модель
     space: np.ndarray[bool] = np.zeros([W_PIX, l_pix, H_pix], dtype=bool)
-    print('Реальные размеры пространства, мм XYZ:', [l, W, H])
-    print('Пиксельные размеры пространства XYZ:', [space.shape[i] for i in [1, 0, 2]], end='\n\n')
+    if SHOW_CONTEXT:
+        print('Реальные размеры пространства, мм XYZ:', [l, W, H])
+        print('Пиксельные размеры пространства XYZ:', [space.shape[i] for i in [1, 0, 2]], end='\n\n')
 
     # Помещаем модель в пространство
     pixel_size = insert(sliced_model, space)
-    print('Помещаем в точку, мм XYZ:', [X, Y, Z])
-    print('Модель расположена между пикселями XYZ:', [pixel_size[i] for i in [1, 0, 2]], end='\n\n')
+    if SHOW_CONTEXT:
+        print('Помещаем в точку, мм XYZ:', [X, Y, Z])
+        print('Модель расположена между пикселями XYZ:', [pixel_size[i] for i in [1, 0, 2]], end='\n\n')
 
     # Создаём изображение
     display: np.ndarray[float] = x_ray(pixel_size, space)
-    print('Пиксельные размеры изображения YJ:', display.shape)
+    if SHOW_CONTEXT:
+        print('Пиксельные размеры изображения YJ:', display.shape)
 
-    return display
+    imsave(RESULT_PATH, display, cmap='grey')
