@@ -1,21 +1,23 @@
-from matplotlib.pyplot import imsave
 from time import time
 
 import project
 
 
-def settings(model_path: str = 'D:/X-Ray/models/cylinders.stl', save_slices: bool = False,
-             slices_path: str = 'D:/X-Ray/slices/', x_ray_detection_step: float = 0.5, show_progress: bool = True,
-             l: int = 1000, L: int = 2000, h: int = 1000, H: int = 2000, W: int = 2000, scale: float = 0.25,
-             phi_x: float = 0.0, phi_y: float = 0.0, phi_z: float = 0.0, x: int = project.L - project.l // 2,
-             y: int = project.W // 2, z: int = 5 * project.H // 8, mu: float = 0.001, w_pix: int = 1000,
-             d_pix: int = 1500) -> None:
+def settings(model_path: str = 'D:/X-Ray/models/cylinders.stl', result_path: str = 'D:/X-Ray/results/cylinders.png',
+             save_slices: bool = False, slices_path: str = 'D:/X-Ray/slices/', x_ray_detection_step: float = 0.5,
+             show_progress: bool = False, show_context: bool = True,
+             l: int = 1000, L: int = 2000, h: int = 1000, H: int = 2000, W: int = 2000,
+             scale: float = 0.01, phi_x: float = 0.0, phi_y: float = 0.0, phi_z: float = 0.0,
+             x: int = project.L - project.l // 2, y: int = project.W // 2, z: int = 5 * project.H // 8,
+             mu: float = 0.001, w_pix: int = 1000, d_pix: int = 1500) -> None:
     """
     :param model_path: Путь к файлу с .stl моделью
+    :param result_path: Путь к файлу с результирующим изображением
     :param save_slices: Сохранять изображения слайсов?
     :param slices_path: Путь к папке хранения слайсов
     :param x_ray_detection_step: Шаг сетки (в пикселях) для расчёта интенсивности излучения
     :param show_progress: Выводить в консоль прогресс вычислений?
+    :param show_context: Выводить workflow информацию?
     :param l: Длина горизонтальной области с датчиками, мм
     :param L: Расстояние от источника излучения до вертикали рамки с датчиками, мм
     :param h: Расстояние от источника излучения до земли, мм
@@ -32,8 +34,8 @@ def settings(model_path: str = 'D:/X-Ray/models/cylinders.stl', save_slices: boo
     :param w_pix: Ширина результирующего изображения, пиксели
     :param d_pix: Высота результирующего изображения, пиксели
     """
-    for it in ['model_path', 'save_slices', 'slices_path', 'x_ray_detection_step', 'show_progress', 'scale',
-               'phi_x', 'phi_y', 'phi_z', 'x', 'y', 'z', 'mu', 'w_pix', 'd_pix']:
+    for it in ['model_path', 'result_path', 'save_slices', 'slices_path', 'x_ray_detection_step', 'show_progress',
+               'show_context', 'scale', 'phi_x', 'phi_y', 'phi_z', 'x', 'y', 'z', 'mu', 'w_pix', 'd_pix']:
         exec(f'project.{it.upper()} = {it}')
 
     for it in ['l', 'L', 'h', 'H', 'W']:
@@ -47,9 +49,11 @@ def settings(model_path: str = 'D:/X-Ray/models/cylinders.stl', save_slices: boo
     project.h_pix = int(project.h / project.DELTA_J)
 
 
-start = time()
-settings(phi_y=2)
-display = project.workflow()
-print(f'Время работы программы {round(time() - start, 2)} сек.')
-
-imsave("D:/X-Ray/results/cylinders.png", display, cmap='grey')
+for phiz in range(2, 9):
+    start = time()
+    settings(scale=4, phi_z=phiz, mu=0.005,
+             model_path="D:/X-Ray/models/Sphinx_of_Hatshepsut.stl",
+             result_path=f"D:/X-Ray/results/sphinx{phiz}.png",
+             show_context=False)
+    project.workflow()
+    print(f'Время работы программы {round(time() - start, 2)} сек. {phiz}')
