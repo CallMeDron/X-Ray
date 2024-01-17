@@ -1,4 +1,4 @@
-![sphinx](https://github.com/CallMeDron/X-Ray/assets/62312385/013f5ef1-3682-4309-bc25-571119f040d1)
+![dreadnought](https://github.com/CallMeDron/X-Ray/assets/62312385/b7e6acda-7bcc-4c44-a3d3-586c223e84a5)
 
 # Проект X-Ray посвящён численному созданию рентгеновских снимков трёхмерных объектов
 
@@ -30,3 +30,5 @@
 - requirements.txt - необходимые для работы программы зависимости
 - xray.py - основной файл, содержащий все содержательные функции
 - example.py - файл, с примерами запуска
+
+![sphinx](https://github.com/CallMeDron/X-Ray/assets/62312385/013f5ef1-3682-4309-bc25-571119f040d1)
