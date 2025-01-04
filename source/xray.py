@@ -8,10 +8,10 @@ from typing import Optional
 from os.path import isfile, isdir
 
 
-def xray(model_path: str = 'D:/X-Ray/models/dreadnought.stl',
-         result_path: str = 'D:/X-Ray/results/dreadnought.png',
+def xray(model_path: str = 'D:/Programming/Python/X-Ray/models/dreadnought.stl',
+         result_path: str = 'D:/Programming/Python/X-Ray/results/dreadnought.png',
          save_slices: bool = False,
-         slices_dir: str = 'D:/X-Ray/slices/',
+         slices_dir: str = 'D:/Programming/Python/X-Ray/slices/',
          x_ray_detection_step: float = 0.5,
          show_content: bool = True,
          l: int = 500,
